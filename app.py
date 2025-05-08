@@ -11,17 +11,26 @@ from application.model import *
 from datetime import timedelta
 import cloudinary
 from flask_migrate import Migrate
+from dotenv import load_dotenv
+
+# Load the .env file
+load_dotenv()
+
+# Fetch variables
+secret_key = os.getenv("SECRET_KEY")
+debug = os.getenv("DEBUG")
+db_url = os.getenv("DATABASE_URL")
 
 app = None
 api = None
 jwt = None  # JWT manager instance
 
-# Cloudinary configuration
-cloudinary.config(
-    cloud_name='dzz6eozxw' ,
-    api_key='954466492996241' ,
-    api_secret='Iq6D6DmN2uC1pnkK_i9565GVpg0'
+cloudinary.config( 
+  cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"), 
+  api_key = os.getenv("CLOUDINARY_API_KEY"), 
+  api_secret = os.getenv("CLOUDINARY_API_SECRET")
 )
+
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -30,11 +39,9 @@ def create_app():
     else:
         print("Starting Local Development")
         app.config.from_object(LocalDevelopmentConfig)
-
-    app.config["JWT_SECRET_KEY"] = "your-secret-key"  # Change this to a strong secret key in production
-
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)  # Token expires after 30 minutes
-
+    
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "default-jwt-secret")
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=int(os.getenv("JWT_EXP_MINUTES", 30)))
 
     db.init_app(app)
     api = Api(app)
@@ -46,11 +53,6 @@ def create_app():
 
     app.app_context().push()
 
-    # Automatically create all tables (Not recommended for production)
-    # with app.app_context():
-    #     print('Creating database')
-    #     db.create_all()
-    #     print('Database created successfully')
     return app, api
 
 app, api = create_app()
@@ -79,32 +81,14 @@ api.add_resource(ContactAPI,'/api/contact')
 from application.api.gallery import galleryAPI
 api.add_resource(galleryAPI,'/api/gallery')
 
+from application.api.testimonial import TestimonialAPI
+api.add_resource(TestimonialAPI,'/api/testimonial','/api/testimonial/<int:id>')
 
-# ✅ Login Route (JWT Authentication)
-@app.route("/api/login", methods=["POST"])
-def login(): 
+from application.api.booking import BookingAPI
+api.add_resource(BookingAPI ,'/api/booking' ,'/api/booking/<int:id>')
 
-    email = request.json.get("email")
-    password = request.json.get("password")
-
-    if not email or not password:
-        return jsonify({"msg": "Missing username or password"}), 400
-
-    user = Users.query.filter_by(email=email).first()
-
-    if user and bcrypt.checkpw(password.encode('utf-8'), user.password):
-        access_token = create_access_token(identity=email)
-        return jsonify(access_token=access_token), 200
-    else:
-        return jsonify({"msg": "Invalid username or password"}), 401
-
-
-# ✅ Protected Route Example
-@app.route("/api/protected", methods=["GET"])
-@jwt_required()
-def protected():
-    current_user = get_jwt_identity()
-    return jsonify({"logged_in_as": current_user}), 200
+from application.api.checkout import CheckOutAPI
+api.add_resource(CheckOutAPI ,'/api/checkout','/api/checkout/<int:id>')
 
 
 if __name__ == "__main__":

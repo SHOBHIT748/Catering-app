@@ -1,8 +1,8 @@
 from flask_restful import Resource,fields,reqparse ,marshal
-from application.validation import *
-from application.database import *
-from application.model import *
-
+from application.validation import BusinessValidationError
+from application.database import db
+from application.model import Menu
+from sqlalchemy import desc
 
 create_menu_parser=reqparse.RequestParser()
 create_menu_parser.add_argument('title')
@@ -23,9 +23,7 @@ class MenuAPI(Resource):
                 return {'message' :"No menu with given id."}
             return marshal(menu,menu_fields)
         else:
-            all_menu=Menu.query.all()
-            for i in all_menu:
-                print(i.title)
+            all_menu=Menu.query.order_by(desc(Menu.id)).all()
             return [marshal(menu,menu_fields) for menu in all_menu]
 
     def put(self,id):
@@ -39,7 +37,7 @@ class MenuAPI(Resource):
         db.session.commit()
 
         return marshal(menu,menu_fields)
-        
+
 
     def delete(self,id):
         menu=db.session.query(Menu).filter(Menu.id==id).first()
@@ -60,7 +58,7 @@ class MenuAPI(Resource):
             return {'message' :'This menu is already in the database'}
         if not title:
             raise BusinessValidationError(status_code=404 ,error_code=' ' ,error_message='Please enter a title for Menu')
-        
+
         menu=Menu(title=title)
         db.session.add(menu)
         db.session.commit()

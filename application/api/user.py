@@ -15,6 +15,7 @@ create_register_parser.add_argument('email')
 create_register_parser.add_argument('password')
 
 register_fields={
+    'id':fields.Integer,
     "name" : fields.String,
     "email" : fields.String
 }
@@ -31,13 +32,13 @@ class RegisterAPI(Resource):
 
         Email=args.get('email')
         # Using RegEx module to validate email
-        valid_email=re.findall("@gmail.com$", Email) 
+        valid_email=re.findall("@gmail.com$", Email)
         if not valid_email:
             return {'message' : 'Please enter valid email'},400
-            
+
         if Email in user_list:
             return {"message" : "Email already exists"} ,200
-            
+
         Name=args.get('name')
         password=args.get('password')
         print(password)
@@ -49,12 +50,12 @@ class RegisterAPI(Resource):
                 return {'message':"Password must be at least 8 characters long, contain at least one special character, and one number"}, 400
         else:
             raise BusinessValidationError(status_code=404 ,error_code='' ,error_message='Password is required')
-        
+
         if Email is None:
             raise BusinessValidationError(status_code=404 ,error_code='' ,error_message='Email is required')
         if Name is None :
             raise BusinessValidationError(status_code=404,error_code='' ,error_message='Name is required')
-        
+
         else:
             user=Users(email=Email,name=Name,password= bcrypt.hashpw(password, bcrypt.gensalt()) )
             db.session.add(user)
@@ -63,6 +64,7 @@ class RegisterAPI(Resource):
             print(3)
 
         return marshal(user ,register_fields)
+
 
 
 

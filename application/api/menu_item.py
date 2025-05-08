@@ -1,8 +1,9 @@
-from flask_restful import Resource,reqparse,fields,marshal
+from flask_restful import Resource,reqparse,fields,marshal,request
 import werkzeug
 from application.validation import *
 import cloudinary
 from application.model import *
+from sqlalchemy import desc
 
 create_item_parser=reqparse.RequestParser()
 create_item_parser.add_argument('menu_sub_id',location='form')
@@ -24,20 +25,22 @@ item_fields={
 }
 
 class MenuItemAPI(Resource):
-    def get(self,id=None):
-        if id :
-            menu_item=db.session.query(Menu_Items).filter(Menu_Items.id==id).first()
-            return marshal(menu_item,item_fields)
-        
-        args=create_item_parser.parse_args()
-        menu_sub_id=args.get('menu_sub_id')
+    def get(self):
+        # if id :
+        #     menu_item=db.session.query(Menu_Items).filter(Menu_Items.id==id).first()
+        #     return marshal(menu_item,item_fields)
+        print(0)
+        # args=create_item_parser.parse_args()
+        menu_sub_id=request.args.get('menu_sub_id')
+        print(1)
         if menu_sub_id:
-            sub=db.session.query(Menu_Items).filter(Menu_Items.menu_sub_id==menu_sub_id).all()
-            return marshal(sub,item_fields)
+           sub = db.session.query(Menu_Items).filter(Menu_Items.menu_sub_id == menu_sub_id).order_by(desc(Menu_Items.id)).all()
+
+           return marshal(sub,item_fields)
         else:
-            all_menu_item=Menu_Items.query.all()
+            all_menu_item=Menu_Items.query.order_by(desc(Menu_Items.id)).all()
             return marshal(all_menu_item,item_fields)
-        
+
 
     def put(self,id):
         menu_item=db.session.query(Menu_Items).filter(Menu_Items.id==id).first()
@@ -59,12 +62,12 @@ class MenuItemAPI(Resource):
 
            result=cloudinary.uploader.upload(image,public_id=public_id,resource_type='image')
            new_image_url=result['secure_url']
-        
+
            if new_image_url is None:
                 raise BusinessValidationError(status_code=404,error_code='' ,error_message=' new image url  is required')
-           
+           menu_item.image=new_image_url
         db.session.commit()
-        return marshal(menu_item,item_fields) 
+        return marshal(menu_item,item_fields)
 
     def delete(self,id):
         menu_item=db.session.query(Menu_Items).filter(Menu_Items.id==id).first()
@@ -84,7 +87,7 @@ class MenuItemAPI(Resource):
             raise BusinessValidationError(status_code=404,error_code='',error_message='name is required')
         if not image:
             raise BusinessValidationError(status_code=404,error_code='',error_message='image is required')
-        
+
         # Upload to Cloudinary
         result = cloudinary.uploader.upload(image,resource_type='image')
 
@@ -93,7 +96,7 @@ class MenuItemAPI(Resource):
 
         if image_url is None:
             raise BusinessValidationError(status_code=404,error_code='' ,error_message='image url  is required')
-        
+
         new_menu_item=Menu_Items(menu_sub_id=menu_sub_id,name=name,image=image_url)
         db.session.add(new_menu_item)
         db.session.commit()

@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/static/css/main.0b1f11c8.css",
+    "main.js": "/static/js/main.95dfd0f0.js",
+    "static/media/chefImage.avif": "/static/media/chefImage.1a774891fa0c5b180550.avif",
+    "static/media/about.jepg.avif": "/static/media/about.jepg.c1a76711e7ee5d3a934d.avif",
+    "static/media/about.jpg": "/static/media/about.643f58a623fd69882c15.jpg",
+    "static/media/service.jpg": "/static/media/service.4e3528e6123de26fedee.jpg",
+    "static/media/kclogo.png": "/static/media/kclogo.bf35ea99609bc728a19e.png",
+    "static/media/photo.avif": "/static/media/photo.7cc572b2558679e262c4.avif",
+    "static/media/banner.jpeg": "/static/media/banner.05892fe97cce26a5d9e5.jpeg",
+    "static/media/menu.jpg": "/static/media/menu.6e77546e98bd0ac24ae2.jpg",
+    "static/media/testimonial.jpg": "/static/media/testimonial.bc21e84b21f4860fd352.jpg",
+    "static/media/contact.jpg": "/static/media/contact.80f2d0064ecbabf75763.jpg",
+    "index.html": "/index.html",
+    "main.0b1f11c8.css.map": "/static/css/main.0b1f11c8.css.map",
+    "main.95dfd0f0.js.map": "/static/js/main.95dfd0f0.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0b1f11c8.css",
+    "static/js/main.95dfd0f0.js"
+  ]
+}
